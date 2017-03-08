@@ -1,0 +1,24 @@
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    tools:context="com.saka.customviewdemo.fragments.ProgressFragment">
+
+    <com.saka.customviewdemo.views.ArcProgress
+        android:id="@+id/circleprogress"
+        android:layout_width="match_parent"
+        android:layout_height="200dp" />
+
+    <com.saka.customviewdemo.views.CircleProgress
+        android:id="@+id/cprogress"
+        android:layout_width="match_parent"
+        android:layout_height="200dp" />
+
+    <Button
+        android:id="@+id/btn_change"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="更新view" />
+
+</LinearLayout>
