@@ -83,12 +83,12 @@ public class CircleProgress extends View {
     }
 
     public void setValue(int value1, int value2, int value3) {
-        percentOne=0;
-        percentTwo=0;
-        percentThree=0;
-        newPercentOne=0;
-        newPercentTwo=0;
-        newPercentThree=0;
+        percentOne = 0;
+        percentTwo = 0;
+        percentThree = 0;
+        newPercentOne = 0;
+        newPercentTwo = 0;
+        newPercentThree = 0;
         int sum = value1 + value2 + value3;
         percentOne = (float) value1 / sum;
         oldPercentOne = percentOne;
@@ -119,14 +119,13 @@ public class CircleProgress extends View {
         animator3.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                newPercentThree= (float) animation.getAnimatedValue();
+                newPercentThree = (float) animation.getAnimatedValue();
                 invalidate();
             }
         });
-        AnimatorSet animatorSet=new AnimatorSet();
-        animatorSet.playSequentially(animator1,animator2,animator3);
+        AnimatorSet animatorSet = new AnimatorSet();
+        animatorSet.playSequentially(animator1, animator2, animator3);
         animatorSet.start();
         Log.d("rect :", "percentone=" + percentOne + ",percenttwo=" + percentTwo + ",percentthree=" + percentThree);
-
     }
 }

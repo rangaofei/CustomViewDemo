@@ -8,8 +8,11 @@ import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.widget.TextView;
 
+import com.saka.customviewdemo.fragments.ButtonMoveFragment;
+import com.saka.customviewdemo.fragments.ClockFragment;
 import com.saka.customviewdemo.fragments.ProgressFragment;
 import com.saka.customviewdemo.fragments.TextFragment;
 
@@ -34,7 +37,8 @@ public class MainActivity extends FragmentActivity {
                     ft.replace(R.id.content, new ProgressFragment()).commit();
                     return true;
                 case R.id.navigation_notifications:
-                    mTextMessage.setText(R.string.title_notifications);
+                    ft = fm.beginTransaction();
+                    ft.replace(R.id.content, new ClockFragment()).commit();
                     return true;
             }
             return false;
@@ -51,4 +55,8 @@ public class MainActivity extends FragmentActivity {
         navigation.setOnNavigationItemSelectedListener(mOnNavigationItemSelectedListener);
     }
 
+    @Override
+    public boolean dispatchTouchEvent(MotionEvent ev) {
+        return super.dispatchTouchEvent(ev);
+    }
 }
