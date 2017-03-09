@@ -22,25 +22,23 @@ import java.util.TimeZone;
 
 public class MyClock extends View {
 
-    private Calendar calendar;
-    private int year;
-    private int month;
-    private int day;
-    private int hour;
-    private int min;
-    private int sec;
+
     private float passArc;
     private int width;
     private int height;
     private Paint bgPaint;
-    private Paint pinPaint;
+    private Paint boldNumPaint;
+    private Paint thinNumPaint;
     private Paint secondPaint;
+    private Paint centerPaint;
+    private Paint innerPaint;
     private RectF outCircle;
     private RectF inCircle;
     private RectF innerCircle;
     private RectF centerCircle;
     private float radius;
     private MyTime myTime;
+    private ValueAnimator animator;
     private static final String TAG = "Clock";
     private static final float threeSqure = 1.7320508075689F;
     private static final float PIE = 3.1415926F;
@@ -88,6 +86,7 @@ public class MyClock extends View {
         drawHourGap(canvas);
         drawInnerCircle(canvas);
         drawCenter(canvas);
+        drawM(canvas);
         drawS(canvas);
     }
 
@@ -98,29 +97,34 @@ public class MyClock extends View {
     }
 
     private void init() {
-//        myTime = new MyTime();
-//        Log.d(TAG, myTime.toString());
-//        this.year = myTime.getYear();
-//        this.month = myTime.getMonth();
-//        this.day = myTime.getDay();
-//        this.hour = myTime.getHour();
-//        this.min = myTime.getMin();
-//        this.sec = myTime.getSec();
         bgPaint = new Paint();
         bgPaint.setStyle(Paint.Style.STROKE);
         bgPaint.setColor(Color.BLACK);
         bgPaint.setStrokeWidth(10);
         bgPaint.setAntiAlias(true);
-        pinPaint = new Paint();
-        pinPaint.setStyle(Paint.Style.STROKE);
-        pinPaint.setColor(Color.BLACK);
-        pinPaint.setStrokeWidth(20);
-        pinPaint.setAntiAlias(true);
+        boldNumPaint = new Paint();
+        boldNumPaint.setStyle(Paint.Style.STROKE);
+        boldNumPaint.setColor(Color.BLACK);
+        boldNumPaint.setStrokeWidth(20);
+        boldNumPaint.setAntiAlias(true);
+        thinNumPaint = new Paint();
+        thinNumPaint.setStyle(Paint.Style.STROKE);
+        thinNumPaint.setColor(Color.BLACK);
+        thinNumPaint.setStrokeWidth(10);
+        thinNumPaint.setAntiAlias(true);
         secondPaint = new Paint();
         secondPaint.setStyle(Paint.Style.FILL);
         secondPaint.setColor(Color.GREEN);
         secondPaint.setAntiAlias(true);
         secondPaint.setStrokeWidth(10);
+        centerPaint = new Paint();
+        centerPaint.setStyle(Paint.Style.FILL);
+        centerPaint.setColor(Color.GREEN);
+        centerPaint.setAntiAlias(true);
+        innerPaint = new Paint();
+        innerPaint.setStyle(Paint.Style.FILL);
+        innerPaint.setColor(Color.WHITE);
+        innerPaint.setAntiAlias(true);
     }
 
     private void drawBackGround(Canvas canvas) {
@@ -130,74 +134,82 @@ public class MyClock extends View {
         bgPaint.setColor(Color.BLACK);
         bgPaint.setStyle(Paint.Style.STROKE);
         canvas.drawArc(outCircle, 0, 360, false, bgPaint);
-        canvas.drawArc(inCircle, 0, 360, true, bgPaint);
+        canvas.drawArc(inCircle, 0, 360, false, bgPaint);
     }
 
     private void draw0369(Canvas canvas) {
-        canvas.drawLine(width / 2, 55, width / 2, height - 55, pinPaint);
-        canvas.drawLine(55, height / 2, width - 55, height / 2, pinPaint);
+        canvas.drawLine(width / 2, 55, width / 2, height - 55, boldNumPaint);
+        canvas.drawLine(55, height / 2, width - 55, height / 2, boldNumPaint);
     }
 
     private void drawHourGap(Canvas canvas) {
-        pinPaint.setStrokeWidth(10);
         canvas.drawLine(radius * (1 - threeSqure / 2) + 55,
                 (height - radius) / 2,
                 width - 55 - radius * (1 - threeSqure / 2),
-                (height + radius) / 2, pinPaint);
+                (height + radius) / 2, thinNumPaint);
         canvas.drawLine(radius * (1 - threeSqure / 2) + 55,
                 (height + radius) / 2,
                 width - 55 - radius * (1 - threeSqure / 2),
-                (height - radius) / 2, pinPaint);
+                (height - radius) / 2, thinNumPaint);
         canvas.drawLine(radius / 2 + 55,
                 height / 2 - radius * threeSqure / 2,
                 width - 55 - radius / 2,
-                height / 2 + radius * threeSqure / 2, pinPaint);
+                height / 2 + radius * threeSqure / 2, thinNumPaint);
         canvas.drawLine(radius / 2 + 55,
                 height / 2 + radius * threeSqure / 2,
                 width - 55 - radius / 2,
-                height / 2 - radius * threeSqure / 2, pinPaint);
+                height / 2 - radius * threeSqure / 2, thinNumPaint);
     }
 
     private void drawInnerCircle(Canvas canvas) {
-        pinPaint.setColor(Color.WHITE);
-        pinPaint.setStyle(Paint.Style.FILL);
-        canvas.drawArc(innerCircle, 0, 360, true, pinPaint);
+
+        canvas.drawArc(innerCircle, 0, 360, true, innerPaint);
     }
 
     private void drawCenter(Canvas canvas) {
-        pinPaint.setColor(Color.BLACK);
-        pinPaint.setStyle(Paint.Style.FILL);
-        canvas.drawCircle(width / 2, height / 2, 20, pinPaint);
+        canvas.drawCircle(width / 2, height / 2, 20, centerPaint);
     }
 
     private void drawS(final Canvas canvas) {
         canvas.drawLine(width / 2,
                 height / 2,
-                (float) (height / 2 - radius * Math.cos(passArc)),
-                (float) (width / 2 + radius * Math.sin(passArc)),
+                height / 2 - radius * (float) Math.cos(setSecond(new MyTime())),
+                width / 2 - radius * (float) Math.sin(setSecond(new MyTime())),
                 secondPaint);
     }
 
-    private int setTime(MyTime myTime) {
-        int passTime = myTime.getSec();
-        return 6 * passTime;
+    private void drawM(Canvas canvas) {
+        canvas.drawLine(width / 2, height / 2,
+                height / 2 - (radius - 20) * (float) Math.cos(setMinute(new MyTime())),
+                width / 2 - (radius - 20) * (float) Math.sin(setMinute(new MyTime())),
+                secondPaint);
+    }
+
+    private float setSecond(MyTime myTime) {
+        float passSecond = myTime.getSec();
+        return 6 * passSecond / 180 * +PIE / 2;
+    }
+
+    private float setMinute(MyTime myTime) {
+        float passMinute = myTime.getMin() * 6 + myTime.getSec() / 10;
+        return passMinute / 180 * PIE + PIE / 2;
     }
 
     public void startClock() {
         myTime = new MyTime();
-        Log.d(TAG,myTime.toString());
-        ValueAnimator animator = ValueAnimator.ofFloat(setTime(myTime), setTime(myTime) + 2 * PIE);
+        Log.d(TAG, myTime.toString());
+        animator = ValueAnimator.ofFloat(0, 360);
+        animator.removeAllUpdateListeners();
         animator.setDuration(60 * 1000);
         animator.setInterpolator(new LinearInterpolator());
         animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                Log.d(TAG, "获得的值" + animation.getAnimatedValue());
-                passArc = PIE - (float) animation.getAnimatedValue();
                 invalidate();
             }
         });
         animator.start();
+
     }
 
     class MyTime {
