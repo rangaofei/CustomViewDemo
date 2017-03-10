@@ -12,9 +12,11 @@ import android.view.MotionEvent;
 import android.widget.TextView;
 
 import com.saka.customviewdemo.fragments.ButtonMoveFragment;
+import com.saka.customviewdemo.fragments.CalendarFragment;
 import com.saka.customviewdemo.fragments.ClockFragment;
 import com.saka.customviewdemo.fragments.ProgressFragment;
 import com.saka.customviewdemo.fragments.TextFragment;
+import com.saka.customviewdemo.views.MyCalendar;
 
 public class MainActivity extends FragmentActivity {
 
@@ -39,6 +41,10 @@ public class MainActivity extends FragmentActivity {
                 case R.id.navigation_notifications:
                     ft = fm.beginTransaction();
                     ft.replace(R.id.content, new ClockFragment()).commit();
+                    return true;
+                case R.id.navigation_third:
+                    ft=fm.beginTransaction();
+                    ft.replace(R.id.content,new CalendarFragment()).commit();
                     return true;
             }
             return false;

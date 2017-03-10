@@ -1,5 +1,6 @@
 package com.saka.customviewdemo.views;
 
+import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
@@ -13,7 +14,6 @@ import android.view.View;
 import android.view.animation.LinearInterpolator;
 
 import java.util.Calendar;
-import java.util.Locale;
 import java.util.TimeZone;
 
 /**
@@ -22,8 +22,9 @@ import java.util.TimeZone;
 
 public class MyClock extends View {
 
-
-    private float passArc;
+    private float passMinuteArc;
+    private float passSecondArc;
+    private float passHourArc;
     private int width;
     private int height;
     private Paint bgPaint;
@@ -35,13 +36,14 @@ public class MyClock extends View {
     private RectF outCircle;
     private RectF inCircle;
     private RectF innerCircle;
-    private RectF centerCircle;
     private float radius;
     private MyTime myTime;
-    private ValueAnimator animator;
+    private ValueAnimator animatorSecond;
+    private ValueAnimator animatorMinute;
+    private ValueAnimator animatorHour;
     private static final String TAG = "Clock";
     private static final float threeSqure = 1.7320508075689F;
-    private static final float PIE = 3.1415926F;
+    private static final float PIE = 3.1415926535898F;
 
     public MyClock(Context context) {
         super(context);
@@ -74,7 +76,7 @@ public class MyClock extends View {
         outCircle = new RectF(5, 5, width - 5, height - 5);
         radius = (float) ((width - 110) / 2);
         innerCircle = new RectF(100, 100, width - 100, height - 100);
-        centerCircle = new RectF(width / 2 - 50, height / 2 - 50, width / 2 + 50, height / 2 + 50);
+
     }
 
     @Override
@@ -85,9 +87,10 @@ public class MyClock extends View {
         draw0369(canvas);
         drawHourGap(canvas);
         drawInnerCircle(canvas);
-        drawCenter(canvas);
         drawM(canvas);
         drawS(canvas);
+        drawH(canvas);
+        drawCenter(canvas);
     }
 
     @Override
@@ -119,7 +122,7 @@ public class MyClock extends View {
         secondPaint.setStrokeWidth(10);
         centerPaint = new Paint();
         centerPaint.setStyle(Paint.Style.FILL);
-        centerPaint.setColor(Color.GREEN);
+        centerPaint.setColor(Color.BLACK);
         centerPaint.setAntiAlias(true);
         innerPaint = new Paint();
         innerPaint.setStyle(Paint.Style.FILL);
@@ -162,7 +165,6 @@ public class MyClock extends View {
     }
 
     private void drawInnerCircle(Canvas canvas) {
-
         canvas.drawArc(innerCircle, 0, 360, true, innerPaint);
     }
 
@@ -171,23 +173,37 @@ public class MyClock extends View {
     }
 
     private void drawS(final Canvas canvas) {
+        secondPaint.setColor(Color.GREEN);
+        secondPaint.setStrokeWidth(10);
         canvas.drawLine(width / 2,
                 height / 2,
-                height / 2 - radius * (float) Math.cos(setSecond(new MyTime())),
-                width / 2 - radius * (float) Math.sin(setSecond(new MyTime())),
+                height / 2 - (radius - 20) * (float) Math.cos(passSecondArc),
+                width / 2 - (radius - 20) * (float) Math.sin(passSecondArc),
                 secondPaint);
     }
 
     private void drawM(Canvas canvas) {
+        secondPaint.setColor(Color.BLUE);
+        secondPaint.setStrokeWidth(20);
         canvas.drawLine(width / 2, height / 2,
-                height / 2 - (radius - 20) * (float) Math.cos(setMinute(new MyTime())),
-                width / 2 - (radius - 20) * (float) Math.sin(setMinute(new MyTime())),
+                height / 2 - (radius - 80) * (float) Math.cos(passMinuteArc),
+                width / 2 - (radius - 80) * (float) Math.sin(passMinuteArc),
                 secondPaint);
+    }
+
+    private void drawH(Canvas canvas) {
+        secondPaint.setColor(Color.BLACK);
+        secondPaint.setStrokeWidth(30);
+        canvas.drawLine(width / 2, height / 2,
+                height / 2 - (radius - 140) * (float) Math.cos(passHourArc),
+                width / 2 - (radius - 140) * (float) Math.sin(passHourArc),
+                secondPaint);
+
     }
 
     private float setSecond(MyTime myTime) {
         float passSecond = myTime.getSec();
-        return 6 * passSecond / 180 * +PIE / 2;
+        return 6 * passSecond / 180 * PIE + PIE / 2;
     }
 
     private float setMinute(MyTime myTime) {
@@ -195,20 +211,55 @@ public class MyClock extends View {
         return passMinute / 180 * PIE + PIE / 2;
     }
 
+    private float setHour(MyTime myTime) {
+        float passHour = myTime.getHour() * 30 + myTime.getMin() / 2;
+        return passHour / 180 * PIE + PIE / 2;
+    }
+
     public void startClock() {
         myTime = new MyTime();
         Log.d(TAG, myTime.toString());
-        animator = ValueAnimator.ofFloat(0, 360);
-        animator.removeAllUpdateListeners();
-        animator.setDuration(60 * 1000);
-        animator.setInterpolator(new LinearInterpolator());
-        animator.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+        animatorSecond = ValueAnimator.ofFloat(setSecond(myTime), setSecond(myTime) + 2 * 60 * PIE);
+        animatorMinute = ValueAnimator.ofFloat(setMinute(myTime), setMinute(myTime) + 2 * PIE);
+        animatorHour = ValueAnimator.ofFloat(setHour(myTime), setHour(myTime) + 6 * PIE / 180);
+
+        animatorSecond.removeAllUpdateListeners();
+        animatorMinute.removeAllUpdateListeners();
+        animatorHour.removeAllUpdateListeners();
+
+        animatorSecond.setDuration(60 * 1000 * 60);
+        animatorMinute.setDuration(60 * 1000 * 60);
+        animatorHour.setDuration(60 * 1000 * 60);
+
+        animatorSecond.setInterpolator(new LinearInterpolator());
+        animatorMinute.setInterpolator(new LinearInterpolator());
+        animatorHour.setInterpolator(new LinearInterpolator());
+
+        animatorSecond.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
-                invalidate();
+                passSecondArc = (float) animation.getAnimatedValue();
+                postInvalidate();
             }
         });
-        animator.start();
+
+        animatorMinute.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                passMinuteArc = (float) animation.getAnimatedValue();
+            }
+        });
+
+        animatorHour.addUpdateListener(new ValueAnimator.AnimatorUpdateListener() {
+            @Override
+            public void onAnimationUpdate(ValueAnimator animation) {
+                passHourArc = (float) animation.getAnimatedValue();
+            }
+        });
+        AnimatorSet set = new AnimatorSet();
+        set.removeAllListeners();
+        set.playTogether(animatorSecond, animatorMinute, animatorHour);
+        set.start();
 
     }
 
