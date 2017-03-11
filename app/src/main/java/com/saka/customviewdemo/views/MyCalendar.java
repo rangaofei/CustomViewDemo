@@ -29,7 +29,8 @@ public class MyCalendar extends View {
     private int firstDayOfWeek;
     private Paint circlePaint;
     private List<PointF> points = new ArrayList<>();
-    private PointF point = new PointF();
+    private float radius;
+    private Paint textPaint;
 
     public MyCalendar(Context context) {
         super(context);
@@ -77,27 +78,32 @@ public class MyCalendar extends View {
     private void cutGrid() {
         float cellWidth = (float) viewWidth / ROW_COUNT;
         float cellHeight = (float) viewHeight / lineCount;
+        this.radius = Math.min(cellWidth / 2, cellHeight / 2);
         for (int i = 0; i < ROW_COUNT; i++) {
             for (int j = 0; j < lineCount; j++) {
-                point.set(cellWidth * i + cellWidth / 2, cellHeight * j + cellHeight / 2);
-                Log.d(TAG,point.toString());
-                points.add(point);
+                points.add(new PointF(cellWidth * i + cellWidth / 2, cellHeight * j + cellHeight / 2));
             }
         }
     }
 
-    public void drawCircle(Canvas canvas, List<PointF> points) {
+    private void drawCircle(Canvas canvas, List<PointF> points) {
         for (PointF f : points) {
-            canvas.drawCircle(f.x / 2, f.y / 2,
-                    Math.min(f.x / 2, f.y / 2), circlePaint);
+            canvas.drawCircle(f.x, f.y,
+                    radius, circlePaint);
+            canvas.drawText("8", f.x-textPaint.measureText("8")/2 , f.y + textPaint.measureText("8") / 2, textPaint);
         }
     }
+
 
     private void init() {
         circlePaint = new Paint();
         circlePaint.setStyle(Paint.Style.STROKE);
         circlePaint.setAntiAlias(true);
         circlePaint.setColor(Color.BLUE);
+        textPaint = new Paint();
+        textPaint.setAntiAlias(true);
+        textPaint.setColor(Color.BLACK);
+        textPaint.setTextSize(50);
     }
 
     public void setDate(CustomDate customDate) {

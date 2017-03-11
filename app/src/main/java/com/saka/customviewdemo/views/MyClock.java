@@ -42,6 +42,7 @@ public class MyClock extends View {
     private ValueAnimator animatorMinute;
     private ValueAnimator animatorHour;
     private static final String TAG = "Clock";
+
     private static final float threeSqure = 1.7320508075689F;
     private static final float PIE = 3.1415926535898F;
 
