@@ -5,7 +5,13 @@
     tools:context="com.saka.customviewdemo.fragments.CalendarFragment">
 
     <com.saka.customviewdemo.views.MyCalendar
-        android:id="@+id/mycalendar"
+        android:id="@+id/ca_original"
+        android:layout_width="match_parent"
+        android:layout_height="400dp"
+        android:visibility="gone" />
+
+    <com.saka.customviewdemo.views.MyViewPager
+        android:id="@+id/myviewpager"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
 

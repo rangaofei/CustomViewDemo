@@ -1,7 +1,6 @@
 package com.saka.customviewdemo.model;
 
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 
 /**
@@ -34,8 +33,28 @@ public class CustomDate {
         dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
     }
 
+    public int getLastMonthDays() {
+
+        return this.getDaysOfMonth(this.year, this.month - 1);
+    }
+
+    /**
+     * 获取第一天是星期几
+     *
+     * @return
+     */
     public int getFirstDayOfWeek() {
         calendar.set(this.year, this.month, 1);
+        return calendar.get(Calendar.DAY_OF_WEEK);
+    }
+
+    /**
+     * 获取最后一天是星期几
+     *
+     * @return
+     */
+    public int getLastDayOfWeek() {
+        calendar.set(this.year, this.month, getTotalDayOfMonth());
         return calendar.get(Calendar.DAY_OF_WEEK);
     }
 
@@ -90,11 +109,11 @@ public class CustomDate {
     }
 
     private int getDaysOfMonth(int year, int month) {
-        if (month > 12) {
-            month = 1;
+        if (month > 11) {
+            month = 0;
             year += 1;
-        } else if (month < 1) {
-            month = 12;
+        } else if (month < 0) {
+            month = 11;
             year -= 1;
         }
 
