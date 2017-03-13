@@ -10,16 +10,31 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
 import android.view.ViewParent;
+import android.widget.Toast;
 
 import com.saka.customviewdemo.model.CustomDate;
+
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.TimeZone;
 
 /**
  * Created by saka on 2017/3/12.
  */
 
-public class MyViewPager extends ViewPager {
+public class MyViewPager extends ViewPager implements MyCalendar.ClickCellListener {
+    private static final String TAG = "MyViewPager";
     private Context context;
     private MyCalendar calendar;
+    private Calendar c;
+    private int year;
+    private int month;
+    private List<MyCalendar> myCalendars = new ArrayList<>();
+    private CustomDate customeDate;
+    private boolean weekendHightLight;
+    private float touchRawY = 0;
+    private LayoutParams lp;
 
     public MyViewPager(Context context) {
         super(context);
@@ -57,32 +72,78 @@ public class MyViewPager extends ViewPager {
     }
 
     @Override
-    public boolean onTouchEvent(MotionEvent ev) {
-        return super.onTouchEvent(ev);
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        boolean result = super.onInterceptTouchEvent(ev);
+
+        switch (ev.getAction()) {
+            case MotionEvent.ACTION_DOWN:
+                touchRawY = ev.getY();
+                break;
+            case MotionEvent.ACTION_MOVE:
+                break;
+            case MotionEvent.ACTION_UP:
+                Log.d(TAG, "touchRawY=" + touchRawY + ",currentY=" + ev.getY());
+                if (touchRawY - ev.getY() < -150) {
+                    Log.d(TAG, "下滑事件");
+
+                    lp.width = 1080;
+                    lp.height = 100;
+                    calendar.invalidate();
+                }
+                if (touchRawY - ev.getY() > 150) {
+                    Log.d(TAG, "上划事件");
+
+                }
+                break;
+        }
+        return result;
     }
 
+
     private void init(int width, int height) {
-        ViewPager.LayoutParams params=new ViewPager.LayoutParams();
-        calendar.setLayoutParams(params);
-        CalendarAdapter adapter = new CalendarAdapter(calendar);
+        lp = new LayoutParams();
+        CalendarAdapter adapter = new CalendarAdapter(calendar, lp);
         this.setAdapter(adapter);
+        c = Calendar.getInstance(TimeZone.getTimeZone("GMT+8"));
+        year = c.get(Calendar.YEAR);
+        month = c.get(Calendar.MONTH);
     }
 
     public void setContext(Context context) {
         this.context = context;
         calendar = new MyCalendar(context);
-        int width=getWidth();
-        int height=getHeight();
-        Log.d("viewpager","width"+width);
+        int width = getWidth();
+        int height = getHeight();
+        Log.d("viewpager", "width" + width);
         init(width, height);
 
     }
 
+    public CustomDate getCurrentDate() {
+        return this.customeDate;
+    }
+
+    public void setWeekendHighLight(boolean b) {
+        this.weekendHightLight = b;
+    }
+
+
+    @Override
+    public void onClickCell(CustomDate customDate) {
+        Toast.makeText(context, customDate.toString(), Toast.LENGTH_SHORT).show();
+    }
+
     private class CalendarAdapter extends PagerAdapter {
         private MyCalendar calendar;
+        private LayoutParams lp;
 
         public CalendarAdapter(MyCalendar calendar) {
             this.calendar = calendar;
+        }
+
+        public CalendarAdapter(MyCalendar calendar, LayoutParams lp) {
+            this.calendar = calendar;
+            this.lp = lp;
         }
 
         @Override
@@ -102,7 +163,24 @@ public class MyViewPager extends ViewPager {
 
         @Override
         public Object instantiateItem(ViewGroup container, int position) {
-            calendar.setDate(new CustomDate(2017,3,1));
+            if (myCalendars.size() > position) {
+                MyCalendar myCalendar = myCalendars.get(position);
+                if (myCalendar != null) {
+                    return myCalendar;
+                }
+            }
+            calendar = new MyCalendar(context);
+            calendar.setClickCellListener(MyViewPager.this);
+            customeDate = new CustomDate(position / 12 + 2000, position % 12, 1);
+            calendar.setDate(customeDate);
+            calendar.setLayoutParams(lp);
+            calendar.setWeekendHighLight(weekendHightLight);
+            calendar.setSpecialDay(new int[]{10,20});
+            calendar.setCanClickNextOrPreMonth(false);
+            while (myCalendars.size() <= position) {
+                myCalendars.add(null);
+            }
+            myCalendars.set(position, calendar);
             ViewParent vp = calendar.getParent();
             if (vp != null) {
                 ViewGroup parent = (ViewGroup) vp;
@@ -111,5 +189,7 @@ public class MyViewPager extends ViewPager {
             container.addView(calendar);
             return calendar;
         }
+
+
     }
 }

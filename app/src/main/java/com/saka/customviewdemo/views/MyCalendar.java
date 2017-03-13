@@ -1,18 +1,21 @@
 package com.saka.customviewdemo.views;
 
 import android.animation.AnimatorSet;
-import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator;
 import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PointF;
+import android.graphics.PorterDuff;
+import android.os.Build;
 import android.support.annotation.Nullable;
+import android.support.annotation.RequiresApi;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
+import android.view.ViewGroup;
 
 import com.saka.customviewdemo.model.CustomDate;
 
@@ -21,6 +24,8 @@ import java.util.List;
 
 import static com.saka.customviewdemo.views.MyCalendar.DayState.CURRENTMONTH;
 import static com.saka.customviewdemo.views.MyCalendar.DayState.NEXTMONTH;
+import static com.saka.customviewdemo.views.MyCalendar.DayState.SPECIALDAY;
+import static com.saka.customviewdemo.views.MyCalendar.DayState.WEEKEND;
 
 /**
  * Created by Administrator on 2017/3/10 0010.
@@ -48,6 +53,7 @@ public class MyCalendar extends View {
     private CellDay[] cellDays;
     private ClickCellListener clickCellListener;
     private DayState tempState;
+    private boolean weekendHighlight;
 
     private float oldPositionX = -100;
     private float oldPositionY = -100;
@@ -62,6 +68,10 @@ public class MyCalendar extends View {
 
     private float touchRawX;
     private float touchRawY;
+    private CellDay tempCellDay;
+    private boolean clearCanvas;
+    private int[] specialDays;
+    private boolean canClickNextOrPreMonth;
 
 
     public MyCalendar(Context context) {
@@ -80,7 +90,14 @@ public class MyCalendar extends View {
 
     @Override
     protected void onMeasure(int widthMeasureSpec, int heightMeasureSpec) {
-        super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        int mode = MeasureSpec.getMode(widthMeasureSpec);
+        if (mode == MeasureSpec.EXACTLY) {
+            int width = MeasureSpec.getSize(widthMeasureSpec);
+            int height = MeasureSpec.getSize(heightMeasureSpec);
+            setMeasuredDimension(width, height);
+        } else {
+            super.onMeasure(widthMeasureSpec, heightMeasureSpec);
+        }
         Log.d(TAG, "onMeasure");
     }
 
@@ -89,7 +106,7 @@ public class MyCalendar extends View {
         super.onSizeChanged(w, h, oldw, oldh);
         this.viewWidth = w;
         this.viewHeight = h;
-        Log.d(TAG, "onSizeChanged"+w+h);
+        Log.d(TAG, "onSizeChanged" + w + h);
         cutGrid();
         init();
         setCellDay();
@@ -101,10 +118,17 @@ public class MyCalendar extends View {
         Log.d(TAG, "onLayout");
     }
 
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+        if (tempCellDay != null) {
+            drawSelectDay(canvas, tempCellDay);
+        }
         drawDays(canvas, cellDays);
+        if (clearCanvas) {
+            clearCanvas(canvas);
+        }
     }
 
     @Override
@@ -120,17 +144,24 @@ public class MyCalendar extends View {
                 break;
             case MotionEvent.ACTION_UP:
                 Log.d(TAG, "MotionEvent:ACTION_UP");
+                Log.d(TAG, "rawY= " + touchRawY + ",touchY= " + event.getY());
                 float touchX = event.getX();
                 float touchY = event.getY();
                 if (touchRawY - touchY < -200) {
                     //下滑事件
                     Log.d(TAG, "下滑事件");
-                    setMaxView();
+//                    setMaxView();
+//                    setCellDay();
+//                    this.clearCanvas = false;
+//                    invalidate();
+
                 }
-                if (touchRawY - touchX > 200) {
+                if (touchRawY - touchY > 200) {
                     //上划事件
                     Log.d(TAG, "上划事件");
-                    setMinView();
+//                    setMinView();
+//                    this.clearCanvas = true;
+//                    invalidate();
                 }
                 if (Math.abs(touchRawX - touchX) < 100 && Math.abs(touchY - touchRawY) < 100) {
                     //点击事件
@@ -138,13 +169,20 @@ public class MyCalendar extends View {
                     int touchRow = (int) (touchX / cellWidth);
                     int touchLine = (int) (touchY / cellHeight);
                     final int touchId = touchLine * ROW_COUNT + touchRow;
-                    tempState = cellDays[touchId].getDayState();
-                    cellDays[touchId].setSelected(true);
-                    CustomDate customDate = cellDays[touchId].getCustomDate();
-                    clickCellListener.onClickCell(customDate);
-                    newPositionX = cellDays[touchId].getPointX();
-                    newPositionY = cellDays[touchId].getPointY();
-                    setselectAnimator(touchId);
+                    if (canClickNextOrPreMonth) {
+                        setClickEvent(touchId);
+                    } else {
+                        if (touchId > firstDayOfWeek - 2 && touchId < monthDaySum + firstDayOfWeek - 1) {
+                            setClickEvent(touchId);
+                            tempCellDay = cellDays[touchId];
+                            tempState = cellDays[touchId].getDayState();
+                            cellDays[touchId].setSelected(true);
+                            newPositionX = cellDays[touchId].getPointX();
+                            newPositionY = cellDays[touchId].getPointY();
+                            setselectAnimator(touchId);
+                        }
+                    }
+
                 }
                 break;
 
@@ -153,6 +191,18 @@ public class MyCalendar extends View {
         return true;
     }
 
+    private void setClickEvent(int touchId) {
+        CustomDate customDate = cellDays[touchId].getCustomDate();
+        if (clickCellListener != null) {
+            clickCellListener.onClickCell(customDate);
+        }
+    }
+
+    /**
+     * 设置选中的动画效果
+     *
+     * @param touchId
+     */
     private void setselectAnimator(final int touchId) {
         selectAnimatorX.removeAllUpdateListeners();
         selectAnimatorX.setFloatValues(oldPositionX, newPositionX);
@@ -171,7 +221,7 @@ public class MyCalendar extends View {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 tempPositionY = (float) animation.getAnimatedValue();
-                tempDate = cellDays[touchId].getDate();
+//                tempDate = cellDays[touchId].getDate();
                 postInvalidate();
             }
         });
@@ -180,16 +230,41 @@ public class MyCalendar extends View {
         animatorSet.start();
     }
 
+    /**
+     * 清除canvas
+     *
+     * @param canvas
+     */
+    private void clearCanvas(Canvas canvas) {
+
+        canvas.drawColor(Color.WHITE, PorterDuff.Mode.SRC);
+        CellDay[] singleLineCellDay = {
+                cellDays[0], cellDays[1], cellDays[2],
+                cellDays[3], cellDays[4], cellDays[5],
+                cellDays[6]
+        };
+        drawDays(canvas, singleLineCellDay);
+    }
+
     private void setMinView() {
-        ObjectAnimator animator=ObjectAnimator.ofFloat(this,"Y",0,-viewHeight+100);
-        animator.setDuration(300);
-        animator.start();
+        ViewGroup.LayoutParams lp = this.getLayoutParams();
+        this.viewHeight = lp.height;
+        this.viewWidth = lp.width;
+        this.setLayoutParams(lp);
+        cutGrid();
+        init();
+        setCellDay();
+        invalidate();
+//        ObjectAnimator animator = ObjectAnimator.ofFloat(this, "Y", 0, -viewHeight + 100);
+//        animator.setDuration(300);
+//        animator.start();
     }
 
     private void setMaxView() {
-        ObjectAnimator animator=ObjectAnimator.ofFloat(this,"Y",-viewHeight+100,0);
-        animator.setDuration(300);
-        animator.start();
+        this.setMeasuredDimension(this.viewWidth, this.viewHeight / lineCount);
+//        ObjectAnimator animator = ObjectAnimator.ofFloat(this, "Y", 100, viewHeight);
+//        animator.setDuration(300);
+//        animator.start();
     }
 
     /**
@@ -208,10 +283,17 @@ public class MyCalendar extends View {
                         date.getYear(), date.getMonth() - 1, lastMonthTotalDays - firstDayOfWeek + i + 2));
             }
             if (i >= firstDayOfWeek - 1 && i < monthDaySum + firstDayOfWeek - 1) {
+
                 cellDays[i].setDayState(CURRENTMONTH);
                 cellDays[i].setDate(String.valueOf(i + 2 - firstDayOfWeek));
                 cellDays[i].setCustomDate(new CustomDate(
                         date.getYear(), date.getMonth(), i - firstDayOfWeek + 2));
+                //设置周末高亮
+                if (weekendHighlight) {
+                    if (i % 7 == 0 || i % 7 == 6) {
+                        cellDays[i].setDayState(WEEKEND);
+                    }
+                }
             }
             if (i >= monthDaySum + firstDayOfWeek - 1) {
                 cellDays[i].setDayState(NEXTMONTH);
@@ -219,9 +301,17 @@ public class MyCalendar extends View {
                 cellDays[i].setCustomDate(new CustomDate(
                         date.getYear(), date.getMonth() + 1, i - monthDaySum - firstDayOfWeek + 2));
             }
+            for (int j = 0, s = specialDays.length; j < s; j++) {
+                if (specialDays[j] + firstDayOfWeek - 2 == i) {
+                    cellDays[i].setDayState(SPECIALDAY);
+                }
+            }
         }
     }
 
+    /**
+     * 切分为每天
+     */
     private void cutGrid() {
         cellWidth = (float) viewWidth / ROW_COUNT;
         cellHeight = (float) viewHeight / lineCount;
@@ -233,7 +323,16 @@ public class MyCalendar extends View {
         }
     }
 
+    private void drawSelectDay(Canvas canvas, CellDay c) {
+        canvas.drawCircle(tempPositionX, tempPositionY, radius - 10, selectPaint);
+//        canvas.drawText(c.getDate(),
+//                c.getPointX() - textPaint.measureText(c.getDate()) / 2,
+//                c.getPointY() + textPaint.getTextSize() / 2,
+//                textPaint);
+    }
 
+
+    @RequiresApi(api = Build.VERSION_CODES.LOLLIPOP)
     private void drawDays(Canvas canvas, CellDay[] cellDays) {
         for (CellDay c : cellDays) {
             switch (c.getDayState()) {
@@ -241,8 +340,8 @@ public class MyCalendar extends View {
                     if (c.isSelected()) {
                         circlePaint.setColor(Color.TRANSPARENT);
                     } else {
-                        circlePaint.setColor(Color.BLUE);
-                        textPaint.setColor(Color.BLUE);
+                        circlePaint.setColor(Color.TRANSPARENT);
+                        textPaint.setColor(Color.GRAY);
                     }
                     break;
                 case CURRENTMONTH:
@@ -252,31 +351,56 @@ public class MyCalendar extends View {
                     } else {
                         circlePaint.setColor(Color.RED);
                         textPaint.setColor(Color.RED);
+                        canvas.drawText("班",
+                                c.getPointX() + textPaint.measureText(tempDate) / 2,
+                                c.getPointY() - textPaint.getTextSize() / 2,
+                                textPaint);
                     }
                     break;
                 case NEXTMONTH:
                     if (c.isSelected()) {
                         circlePaint.setColor(Color.TRANSPARENT);
                     } else {
-                        circlePaint.setColor(Color.GREEN);
-                        textPaint.setColor(Color.GREEN);
+                        circlePaint.setColor(Color.TRANSPARENT);
+                        textPaint.setColor(Color.GRAY);
                     }
                     break;
                 case CURRENTDAY:
                     circlePaint.setColor(Color.YELLOW);
                     textPaint.setColor(Color.BLACK);
                     break;
+                case WEEKEND:
+                    circlePaint.setColor(Color.CYAN);
+                    textPaint.setColor(Color.CYAN);
+                    canvas.drawText("休",
+                            c.getPointX() + textPaint.measureText(tempDate) / 2,
+                            c.getPointY() - textPaint.getTextSize() / 2,
+                            textPaint);
+                    break;
+                case SPECIALDAY:
+                    circlePaint.setColor(Color.GREEN);
+                    textPaint.setColor(Color.GREEN);
+                    canvas.drawText("假",
+                            c.getPointX() + textPaint.measureText(tempDate) / 2,
+                            c.getPointY() - textPaint.getTextSize() / 2,
+                            textPaint);
             }
-            canvas.drawCircle(tempPositionX, tempPositionY, radius - 10, selectPaint);
-            canvas.drawText(tempDate,
-                    tempPositionX - textPaint.measureText(tempDate) / 2,
-                    tempPositionY + textPaint.getTextSize() / 2,
-                    selectTextPaint);
+//            canvas.drawCircle(tempPositionX, tempPositionY, radius - 10, selectPaint);
+//            canvas.drawText(tempDate,
+//                    tempPositionX - textPaint.measureText(tempDate) / 2,
+//                    tempPositionY + textPaint.getTextSize() / 2,
+//                    selectTextPaint);
             canvas.drawText(c.getDate(),
                     c.getPointX() - textPaint.measureText(c.getDate()) / 2,
                     c.getPointY() + textPaint.getTextSize() / 2,
                     textPaint);
-            canvas.drawCircle(c.getPointX(), c.getPointY(), radius - 10, circlePaint);
+//            canvas.drawCircle(c.getPointX(), c.getPointY(), radius - 10, circlePaint);
+            //这个地方改为rectf可以向下兼容
+            canvas.drawArc(c.getPointX() - radius + 10,
+                    c.getPointY() - radius + 10,
+                    c.getPointX() + radius - 10,
+                    c.getPointY() + radius - 10,
+                    0, 270, false, circlePaint);
             c.setSelected(false);
             oldPositionX = newPositionX;
             oldPositionY = newPositionY;
@@ -295,7 +419,8 @@ public class MyCalendar extends View {
         textPaint.setColor(Color.BLACK);
         textPaint.setTextSize(radius / 2);
         selectPaint = new Paint();
-        selectPaint.setColor(Color.DKGRAY);
+        selectPaint.setColor(Color.YELLOW);
+        selectPaint.setAlpha(10);
         selectPaint.setAntiAlias(true);
         selectPaint.setStyle(Paint.Style.FILL);
         selectTextPaint = new Paint();
@@ -321,6 +446,28 @@ public class MyCalendar extends View {
     }
 
     /**
+     * 暴露接口，设置是否周末高亮
+     *
+     * @param b
+     */
+    public void setWeekendHighLight(boolean b) {
+        this.weekendHighlight = b;
+    }
+
+    public void setSpecialDay(int[] ints) {
+        this.specialDays = ints;
+    }
+
+    /**
+     * 暴露接口，设置是否可以点击前一个月和后一个月的日期
+     *
+     * @param b
+     */
+    public void setCanClickNextOrPreMonth(boolean b) {
+        this.canClickNextOrPreMonth = b;
+    }
+
+    /**
      * 获得应该设置为多少行
      *
      * @return
@@ -331,7 +478,7 @@ public class MyCalendar extends View {
     }
 
     public enum DayState {
-        LASTMONTH, CURRENTMONTH, NEXTMONTH, CURRENTDAY;
+        LASTMONTH, CURRENTMONTH, NEXTMONTH, CURRENTDAY, WEEKEND, SPECIALDAY;
     }
 
     public void setClickCellListener(ClickCellListener listener) {
