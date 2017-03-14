@@ -85,8 +85,7 @@ public class SectorButton extends View {
         this.circleX = (float) w / 2;
         this.circleY = (float) h / 3 * 2;
         this.circleR = (float) h / 3;
-        buttonRect = new RectF(circleX - 2 * circleR, circleY - 2 * circleR,
-                circleX + 2 * circleR, circleY + 2 * circleR);
+        buttonRect = new RectF();
     }
 
     @Override
@@ -109,11 +108,11 @@ public class SectorButton extends View {
                         Log.d(TAG, "点击事件");
                         if (!expandable) {
                             this.expandable = !expandable;
-                            setAnimator(0,circleR);
+                            setAnimator(0, circleR);
                             Log.d(TAG, "展开");
                         } else {
                             this.expandable = !expandable;
-                            setAnimator(circleR,0);
+                            setAnimator(circleR, 0);
                             Log.d(TAG, "收缩");
                         }
 //                        this.expandable = !expandable;
@@ -158,17 +157,17 @@ public class SectorButton extends View {
     }
 
     private void drawSector1(Canvas canvas) {
-        sectorPaint.setColor(Color.BLUE);
+        sectorPaint.setColor(Color.LTGRAY);
         canvas.drawArc(buttonRect, 180, 60, true, sectorPaint);
     }
 
     private void drawSector2(Canvas canvas) {
-        sectorPaint.setColor(Color.RED);
+        sectorPaint.setColor(Color.LTGRAY);
         canvas.drawArc(buttonRect, 2400, 60, true, sectorPaint);
     }
 
     private void drawSector3(Canvas canvas) {
-        sectorPaint.setColor(Color.CYAN);
+        sectorPaint.setColor(Color.LTGRAY);
         canvas.drawArc(buttonRect, 300, 60, true, sectorPaint);
     }
 
@@ -200,7 +199,10 @@ public class SectorButton extends View {
         sectorPaint = new Paint();
         sectorPaint.setColor(Color.BLUE);
         sectorPaint.setAntiAlias(true);
-        sectorPaint.setStyle(Paint.Style.FILL);
+        sectorPaint.setStrokeWidth(2);
+
+        sectorPaint.setStyle(Paint.Style.FILL_AND_STROKE);
+        sectorPaint.setAlpha(20);
     }
 
     public void setClickSectorButton(ClickSectorButton listener) {

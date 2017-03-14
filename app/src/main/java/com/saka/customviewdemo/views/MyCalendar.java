@@ -152,9 +152,10 @@ public class MyCalendar extends View {
 //                    setCellDay();
 //                    this.clearCanvas = false;
 //                    invalidate();
-
+                    cutGrid();
+                    init();
                     this.layout(0, 0, this.viewWidth, this.viewHeight / 2);
-
+                    setCellDay();
                     invalidate();
                 }
                 if (touchRawY - touchY > 200) {
