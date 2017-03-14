@@ -9,14 +9,21 @@
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:hint="请输入文字" />
-<ToggleButton
-    android:layout_width="match_parent"
-    android:layout_height="100dp"
-    android:textOn="开"
-    android:textOff="关"/>
+
+    <ToggleButton
+        android:layout_width="match_parent"
+        android:layout_height="100dp"
+        android:textOff="关"
+        android:textOn="开" />
+
     <Switch
         android:layout_width="match_parent"
         android:layout_height="50dp"
         android:textOff="关"
-        android:textOn="开"/>
+        android:textOn="开" />
+
+    <com.saka.customviewdemo.views.SectorButton
+        android:id="@+id/sector_button"
+        android:layout_width="match_parent"
+        android:layout_height="200dp" />
 </LinearLayout>

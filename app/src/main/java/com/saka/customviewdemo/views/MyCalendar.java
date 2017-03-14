@@ -122,9 +122,7 @@ public class MyCalendar extends View {
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
-        if (tempCellDay != null) {
-            drawSelectDay(canvas, tempCellDay);
-        }
+
         drawDays(canvas, cellDays);
         if (clearCanvas) {
             clearCanvas(canvas);
@@ -155,6 +153,9 @@ public class MyCalendar extends View {
 //                    this.clearCanvas = false;
 //                    invalidate();
 
+                    this.layout(0, 0, this.viewWidth, this.viewHeight / 2);
+
+                    invalidate();
                 }
                 if (touchRawY - touchY > 200) {
                     //上划事件
@@ -385,7 +386,7 @@ public class MyCalendar extends View {
                             c.getPointY() - textPaint.getTextSize() / 2,
                             textPaint);
             }
-//            canvas.drawCircle(tempPositionX, tempPositionY, radius - 10, selectPaint);
+            canvas.drawCircle(tempPositionX, tempPositionY, radius - 10, selectPaint);
 //            canvas.drawText(tempDate,
 //                    tempPositionX - textPaint.measureText(tempDate) / 2,
 //                    tempPositionY + textPaint.getTextSize() / 2,
