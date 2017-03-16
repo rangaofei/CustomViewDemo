@@ -200,7 +200,7 @@ public class SectorButton extends View {
         sectorPaint.setColor(Color.BLUE);
         sectorPaint.setAntiAlias(true);
         sectorPaint.setStrokeWidth(2);
-
+ 
         sectorPaint.setStyle(Paint.Style.FILL_AND_STROKE);
         sectorPaint.setAlpha(20);
     }

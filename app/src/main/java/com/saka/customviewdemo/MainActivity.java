@@ -13,8 +13,10 @@ import android.widget.TextView;
 
 import com.saka.customviewdemo.fragments.ButtonMoveFragment;
 import com.saka.customviewdemo.fragments.CalendarFragment;
+import com.saka.customviewdemo.fragments.CircleFragment;
 import com.saka.customviewdemo.fragments.ClockFragment;
 import com.saka.customviewdemo.fragments.ProgressFragment;
+import com.saka.customviewdemo.fragments.ScrollFragment;
 import com.saka.customviewdemo.fragments.TextFragment;
 import com.saka.customviewdemo.views.MyCalendar;
 
@@ -32,7 +34,7 @@ public class MainActivity extends FragmentActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     ft = fm.beginTransaction();
-                    ft.replace(R.id.content, new TextFragment()).commit();
+                    ft.replace(R.id.content, new CircleFragment()).commit();
                     return true;
                 case R.id.navigation_dashboard:
                     ft = fm.beginTransaction();

@@ -1,0 +1,24 @@
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    tools:context="com.saka.customviewdemo.fragments.ScrollFragment">
+
+    <com.saka.customviewdemo.views.GuideScrollPager
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content">
+        <ImageView
+            android:layout_width="360dp"
+            android:layout_height="540dp"
+            android:src="@mipmap/guide_1"/>
+        <ImageView
+            android:layout_width="360dp"
+            android:layout_height="540dp"
+            android:src="@mipmap/guide_2"/>
+        <ImageView
+            android:layout_width="360dp"
+            android:layout_height="540dp"
+            android:src="@mipmap/guide_3"/>
+    </com.saka.customviewdemo.views.GuideScrollPager>
+
+</FrameLayout>
