@@ -72,32 +72,46 @@ public class MyViewPager extends ViewPager implements MyCalendar.ClickCellListen
     }
 
     @Override
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        boolean result = super.onInterceptTouchEvent(ev);
-
-        switch (ev.getAction()) {
-            case MotionEvent.ACTION_DOWN:
-                touchRawY = ev.getY();
-                break;
-            case MotionEvent.ACTION_MOVE:
-                break;
-            case MotionEvent.ACTION_UP:
-                Log.d(TAG, "touchRawY=" + touchRawY + ",currentY=" + ev.getY());
-                if (touchRawY - ev.getY() < -150) {
-                    Log.d(TAG, "下滑事件");
-
-                    lp.width = 1080;
-                    lp.height = 100;
-                    calendar.invalidate();
-                }
-                if (touchRawY - ev.getY() > 150) {
-                    Log.d(TAG, "上划事件");
-
-                }
-                break;
-        }
-        return result;
+    public boolean showContextMenu() {
+//        return super.showContextMenu();
+        Log.d(TAG, "showContextMenu");
+        return true;
     }
+
+    @Override
+    public boolean showContextMenuForChild(View originalView) {
+//        return super.showContextMenuForChild(originalView);
+        Log.d(TAG, "showContextMenuForChild");
+        return true;
+    }
+
+
+    //    @Override
+//    public boolean onInterceptTouchEvent(MotionEvent ev) {
+//        boolean result = super.onInterceptTouchEvent(ev);
+//
+//        switch (ev.getAction()) {
+//            case MotionEvent.ACTION_DOWN:
+//                touchRawY = ev.getY();
+//                break;
+//            case MotionEvent.ACTION_MOVE:
+//                break;
+//            case MotionEvent.ACTION_UP:
+//                Log.d(TAG, "touchRawY=" + touchRawY + ",currentY=" + ev.getY());
+//                if (touchRawY - ev.getY() < -150) {
+//                    Log.d(TAG, "下滑事件");
+//
+//                    lp.width = 1080;
+//                    lp.height = 100;
+//                    calendar.invalidate();
+//                }
+//                if (touchRawY - ev.getY() > 150) {
+//                    Log.d(TAG, "上划事件");
+//                }
+//                break;
+//        }
+//        return result;
+//    }
 
 
     private void init(int width, int height) {
@@ -175,7 +189,7 @@ public class MyViewPager extends ViewPager implements MyCalendar.ClickCellListen
             calendar.setDate(customeDate);
             calendar.setLayoutParams(lp);
             calendar.setWeekendHighLight(weekendHightLight);
-            calendar.setSpecialDay(new int[]{10,20});
+            calendar.setSpecialDay(new int[]{10, 20});
             calendar.setCanClickNextOrPreMonth(false);
             while (myCalendars.size() <= position) {
                 myCalendars.add(null);

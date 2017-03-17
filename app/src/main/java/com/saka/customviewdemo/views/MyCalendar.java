@@ -132,6 +132,7 @@ public class MyCalendar extends View {
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         Log.d(TAG, "MontionEvent" + event.getAction());
+        boolean b = false;
         switch (event.getAction()) {
             case MotionEvent.ACTION_DOWN:
                 touchRawX = event.getX();
@@ -186,6 +187,7 @@ public class MyCalendar extends View {
                     }
 
                 }
+//                b = true;
                 break;
 
         }
@@ -223,7 +225,7 @@ public class MyCalendar extends View {
             @Override
             public void onAnimationUpdate(ValueAnimator animation) {
                 tempPositionY = (float) animation.getAnimatedValue();
-//                tempDate = cellDays[touchId].getDate();
+                //                tempDate = cellDays[touchId].getDate();
                 postInvalidate();
             }
         });

@@ -7,6 +7,7 @@ import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentStatePagerAdapter;
 import android.support.v4.view.ViewPager;
 import android.util.Log;
+import android.view.ContextMenu;
 import android.view.LayoutInflater;
 import android.view.MotionEvent;
 import android.view.View;
@@ -75,6 +76,12 @@ public class CalendarFragment extends Fragment implements
 
     }
 
+
+    @Override
+    public void onCreateContextMenu(ContextMenu menu, View v, ContextMenu.ContextMenuInfo menuInfo) {
+        getActivity().getMenuInflater().inflate(R.menu.navigation, menu);
+    }
+
     @Override
     public void onPageSelected(int position) {
         StringBuilder builder = new StringBuilder();
@@ -111,8 +118,7 @@ public class CalendarFragment extends Fragment implements
 
 //            date = new CustomDate(year, month, day);
 
-            CalendarContainerFragment fragment = new CalendarContainerFragment();
-            return fragment;
+            return new CalendarContainerFragment();
         }
 
         @Override

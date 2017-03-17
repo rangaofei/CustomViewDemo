@@ -17,6 +17,10 @@ public class CustomDate {
     public CustomDate() {
     }
 
+    /**
+     * 获取当前的日期
+     * @return
+     */
     public CustomDate getCurrentDate() {
         this.year = calendar.get(Calendar.YEAR);
         this.month = calendar.get(Calendar.MONTH);
@@ -33,8 +37,11 @@ public class CustomDate {
         dayOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
     }
 
+    /**
+     * 获取上个月的天数
+     * @return
+     */
     public int getLastMonthDays() {
-
         return this.getDaysOfMonth(this.year, this.month - 1);
     }
 
@@ -58,6 +65,10 @@ public class CustomDate {
         return calendar.get(Calendar.DAY_OF_WEEK);
     }
 
+    /**
+     * 获取这个月总共的天数
+     * @return
+     */
     public int getTotalDayOfMonth() {
         return this.getDaysOfMonth(year, month);
     }
@@ -108,6 +119,12 @@ public class CustomDate {
                 '}';
     }
 
+    /**
+     * 获取年中每月的天数
+     * @param year
+     * @param month
+     * @return
+     */
     private int getDaysOfMonth(int year, int month) {
         if (month > 11) {
             month = 0;
