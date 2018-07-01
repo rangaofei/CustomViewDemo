@@ -15,6 +15,7 @@ import com.saka.customviewdemo.fragments.ButtonMoveFragment;
 import com.saka.customviewdemo.fragments.CalendarFragment;
 import com.saka.customviewdemo.fragments.CircleFragment;
 import com.saka.customviewdemo.fragments.ClockFragment;
+import com.saka.customviewdemo.fragments.DividerExampleFragment;
 import com.saka.customviewdemo.fragments.ProgressFragment;
 import com.saka.customviewdemo.fragments.ScrollFragment;
 import com.saka.customviewdemo.fragments.TextFragment;
@@ -34,7 +35,7 @@ public class MainActivity extends FragmentActivity {
             switch (item.getItemId()) {
                 case R.id.navigation_home:
                     ft = fm.beginTransaction();
-                    ft.replace(R.id.content, new CircleFragment()).commit();
+                    ft.replace(R.id.content, new DividerExampleFragment()).commit();
                     return true;
                 case R.id.navigation_dashboard:
                     ft = fm.beginTransaction();
